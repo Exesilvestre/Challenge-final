@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
-import { v4 as uuidv4 } from 'uuid';
 import ChatWindow from '../components/ChatWindow';
 import ConversationList from '../components/ConversationList';
 import MessageInput from '../components/MessageInput';
-import { fetchMessages, sendMessage } from '../services/api';
+import { fetchMessages, sendMessage, fetchConversations, createConversation, updateConversation, deleteConversation } from '../services/api';
 
 const ChatPage = () => {
   const [conversations, setConversations] = useState([]);
@@ -14,26 +13,36 @@ const ChatPage = () => {
   const [newConversationTitle, setNewConversationTitle] = useState('');
 
   useEffect(() => {
-    // Simulate fetching conversations from an API
+    // Fetch real conversations from the API when the component mounts
     const loadConversations = async () => {
-      setConversations([
-        { id: uuidv4(), title: 'Conversación 1' },
-        { id: uuidv4(), title: 'Conversación 2' },
-      ]);
+      try {
+        const data = await fetchConversations();  // Replace with actual API call
+        setConversations(data);
+      } catch (error) {
+        console.error("Error fetching conversations:", error);
+      }
     };
     loadConversations();
   }, []);
 
   const handleSelectConversation = async (conversationId) => {
     setSelectedConversation(conversationId);
-    const data = await fetchMessages(conversationId);
-    setMessages(data);
+    try {
+      const data = await fetchMessages(conversationId); // Fetch messages from the selected conversation
+      setMessages(data);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
   };
 
   const handleSendMessage = async (text) => {
     if (selectedConversation) {
-      const newMessage = await sendMessage(selectedConversation, text);
-      setMessages((prev) => [...prev, newMessage]);
+      try {
+        const newMessage = await sendMessage(selectedConversation, text);
+        setMessages((prev) => [...prev, newMessage]);
+      } catch (error) {
+        console.error("Error sending message:", error);
+      }
     }
   };
 
@@ -43,25 +52,42 @@ const ChatPage = () => {
     setNewConversationTitle('');
   };
 
-  const handleAddConversation = () => {
+  const handleAddConversation = async () => {
     if (newConversationTitle.trim()) {
-      const newConversation = { id: uuidv4(), title: newConversationTitle };
-      setConversations((prev) => [...prev, newConversation]);
-      handleCloseDialog();
+      try {
+        const newConversation = await createConversation({ title: newConversationTitle });
+        setConversations((prev) => [...prev, newConversation]);
+        handleCloseDialog();
+      } catch (error) {
+        console.error("Error creating conversation:", error);
+      }
     }
   };
 
-  const handleEditConversation = (id, newTitle) => {
-    setConversations((prev) =>
-      prev.map((conv) => (conv.id === id ? { ...conv, title: newTitle } : conv))
-    );
+  const handleEditConversation = async (id, newTitle) => {
+    try {
+      // Call your API to update the conversation
+      const updatedConversation = await updateConversation(id, newTitle);
+  
+      // After the update is successful, update the conversations state
+      setConversations((prev) =>
+        prev.map((conv) => (conv.id === id ? { ...conv, name: updatedConversation.name } : conv))
+      );
+    } catch (error) {
+      console.error("Error updating conversation:", error);
+    }
   };
 
-  const handleDeleteConversation = (id) => {
-    setConversations((prev) => prev.filter((conv) => conv.id !== id));
-    if (selectedConversation === id) {
-      setSelectedConversation(null);
-      setMessages([]);
+  const handleDeleteConversation = async (id) => {
+    try {
+      await deleteConversation(id);
+      setConversations((prev) => prev.filter((conv) => conv.id !== id));
+      if (selectedConversation === id) {
+        setSelectedConversation(null);
+        setMessages([]);
+      }
+    } catch (error) {
+      console.error("Error deleting conversation:", error);
     }
   };
 
@@ -77,9 +103,9 @@ const ChatPage = () => {
         <ChatWindow messages={messages} />
         <MessageInput onSendMessage={handleSendMessage} />
       </Box>
-      <Button 
-        variant="contained" 
-        color="primary" 
+      <Button
+        variant="contained"
+        color="primary"
         onClick={handleOpenDialog}
         sx={{ position: 'absolute', top: 16, right: 16 }}
       >

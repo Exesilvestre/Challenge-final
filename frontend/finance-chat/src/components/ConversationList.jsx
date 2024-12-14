@@ -64,7 +64,7 @@ const ConversationList = ({ conversations, onSelectConversation, onEditConversat
             }}
             onClick={() => onSelectConversation(conversation.id)}
           >
-            <ListItemText primary={conversation.title} />
+            <ListItemText primary={conversation.name} />
             <IconButton
               size="small"
               sx={{ color: 'text.secondary' }}
