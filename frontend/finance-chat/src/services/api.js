@@ -15,12 +15,12 @@ export const fetchMessages = async (conversationId) => {
 };
 
 export const sendMessage = async (conversationId, message) => {
-  const response = await fetch(`${API_URL}/conversations/${conversationId}/messages`, {
+  const response = await fetch(`${API_URL}/conversations/generate/${conversationId}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ text: message }),
+    body: JSON.stringify({ prompt: message }),
   });
   if (!response.ok) {
     throw new Error('Failed to send message');

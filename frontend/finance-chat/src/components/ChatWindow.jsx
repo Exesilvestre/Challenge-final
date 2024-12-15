@@ -1,39 +1,39 @@
-import React from 'react';
-import { Box, Typography } from '@mui/material';
+import React, { useEffect, useRef } from 'react';
+import { Box } from '@mui/material';
+import MessageItem from './MessageItem';
 
 const ChatWindow = ({ messages }) => {
+  const chatEndRef = useRef(null);  // Referencia al final del chat
+
+  useEffect(() => {
+    // Desplazar hacia el final cada vez que los mensajes cambian
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);  // Se activa cada vez que los mensajes cambian
+
   return (
     <Box
-        sx={{
-            flex: 1,
-            padding: 2,
-            overflowY: 'auto',
-            backgroundColor: 'background.default',
-            borderRadius: 2,
-        }}
-        >
-        {messages.map((message, index) => (
-            <Box
-            key={index}
-            sx={{
-                marginBottom: 2,
-                textAlign: message.sender === 'user' ? 'right' : 'left',
-            }}
-            >
-            <Typography
-                variant="body1"
-                sx={{
-                padding: 1,
-                backgroundColor: message.sender === 'user' ? 'primary.main' : 'secondary.main',
-                color: message.sender === 'user' ? 'background.default' : 'text.primary',
-                borderRadius: 2,
-                display: 'inline-block',
-                }}
-            >
-                {message.text}
-            </Typography>
-            </Box>
-        ))}
+      sx={{
+        flex: 1,
+        padding: 2,
+        overflowY: 'auto',
+        backgroundColor: 'background.default',
+        borderRadius: 2,
+        height: '400px',
+        margin: '5rem',
+      }}
+    >
+      {messages.map((message, index) => (
+        <MessageItem
+          key={index}
+          message={message}
+          isUser={message.role === 'user'} // Cambiado a 'role' en vez de 'sender'
+        />
+      ))}
+      
+      {/* Elemento invisible que se usa para desplazar el chat al final */}
+      <div ref={chatEndRef} />
     </Box>
   );
 };

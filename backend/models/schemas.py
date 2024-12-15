@@ -7,8 +7,11 @@ class MessageCreate(BaseModel):
 
 class ConversationCreate(BaseModel):
     name: str
-    
-class ConversationUpdate:
+
+class MessagePrompt(BaseModel):
+    prompt: str
+
+class ConversationUpdate(BaseModel):
     new_name: str
 
 class MessageResponse(BaseModel):

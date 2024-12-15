@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, CircularProgress } from '@mui/material';
 import ChatWindow from '../components/ChatWindow';
 import ConversationList from '../components/ConversationList';
 import MessageInput from '../components/MessageInput';
@@ -11,13 +11,24 @@ const ChatPage = () => {
   const [messages, setMessages] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newConversationTitle, setNewConversationTitle] = useState('');
+  const [loading, setLoading] = useState(false); // Estado de carga
 
   useEffect(() => {
-    // Fetch real conversations from the API when the component mounts
+    // Cargar las conversaciones cuando se monta el componente
     const loadConversations = async () => {
       try {
-        const data = await fetchConversations();  // Replace with actual API call
+        const data = await fetchConversations();
         setConversations(data);
+        
+        // Seleccionar la primera conversación si está disponible
+        if (data.length > 0) {
+          const firstConversationId = data[0].id;
+          setSelectedConversation(firstConversationId);
+
+          // Fetch de los mensajes de la primera conversación
+          const messagesData = await fetchMessages(firstConversationId);
+          setMessages(messagesData);
+        }
       } catch (error) {
         console.error("Error fetching conversations:", error);
       }
@@ -28,7 +39,7 @@ const ChatPage = () => {
   const handleSelectConversation = async (conversationId) => {
     setSelectedConversation(conversationId);
     try {
-      const data = await fetchMessages(conversationId); // Fetch messages from the selected conversation
+      const data = await fetchMessages(conversationId);
       setMessages(data);
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -36,16 +47,24 @@ const ChatPage = () => {
   };
 
   const handleSendMessage = async (text) => {
+
     if (selectedConversation) {
+      const newMessage = { content: text, role: 'user' };
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
       try {
-        const newMessage = await sendMessage(selectedConversation, text);
-        setMessages((prev) => [...prev, newMessage]);
+        setLoading(true)
+        const response = await sendMessage(selectedConversation, text);
+        const repsonseMessage = {content: response.response, role: 'assistant'}
+        setMessages((prevMessages) => [...prevMessages, repsonseMessage]);
+        setLoading(false)
       } catch (error) {
-        console.error("Error sending message:", error);
+        setMessages((prevMessages) => prevMessages.filter(msg => msg !== newMessage));
+        alert('Error sending message');
+        setLoading(false)
       }
     }
   };
-
+  
   const handleOpenDialog = () => setDialogOpen(true);
   const handleCloseDialog = () => {
     setDialogOpen(false);
@@ -66,10 +85,7 @@ const ChatPage = () => {
 
   const handleEditConversation = async (id, newTitle) => {
     try {
-      // Call your API to update the conversation
       const updatedConversation = await updateConversation(id, newTitle);
-  
-      // After the update is successful, update the conversations state
       setConversations((prev) =>
         prev.map((conv) => (conv.id === id ? { ...conv, name: updatedConversation.name } : conv))
       );
@@ -101,6 +117,11 @@ const ChatPage = () => {
       />
       <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <ChatWindow messages={messages} />
+        {loading && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 2 }}>
+            <CircularProgress />
+          </Box>
+        )}
         <MessageInput onSendMessage={handleSendMessage} />
       </Box>
       <Button
