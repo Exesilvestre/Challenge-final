@@ -48,8 +48,8 @@ const ConversationList = ({ conversations, onSelectConversation, onEditConversat
         overflowY: 'auto',
       }}
     >
-      <Typography variant="h6" gutterBottom color="primary">
-        Conversaciones
+      <Typography variant="h6" gutterBottom color="primary" align="center">
+        CONVERSACIONES
       </Typography>
       <List>
         {conversations.map((conversation) => (

@@ -10,7 +10,7 @@ const ChatWindow = ({ messages }) => {
     if (chatEndRef.current) {
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages]);  // Se activa cada vez que los mensajes cambian
+  }, [messages]);
 
   return (
     <Box

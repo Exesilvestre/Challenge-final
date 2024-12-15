@@ -4,27 +4,32 @@ const theme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#2ECC71', // Verde financiero
+      main: '#2196F3',
     },
     secondary: {
-      main: '#BFC9CA', // Plata
+      main: '#607D8B',
     },
     background: {
-      default: '#1B263B', // Azul oscuro
-      paper: '#343A40', // Gris carbón
+      default: '#121212',
+      paper: '#1E1E1E',
     },
     text: {
-      primary: '#E5E8E8', // Blanco suave
-      secondary: '#BFC9CA', // Plata
+      primary: '#E0E0E0',
+      secondary: '#B0BEC5',
+    },
+    action: {
+      active: '#64B5F6',
+      hover: '#1976D2',
+      selected: '#1565C0',
     },
   },
   typography: {
     fontFamily: 'Roboto, Arial, sans-serif',
     h6: {
-      fontWeight: 'bold',
+      fontWeight: '500',
     },
     body1: {
-      lineHeight: 1.6,
+      lineHeight: 1.5,
     },
   },
 });
