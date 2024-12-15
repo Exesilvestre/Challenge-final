@@ -4,9 +4,7 @@ import cohere
 
 class CohereClient:
     def __init__(self):
-        # Cargar las variables de entorno desde .env
         load_dotenv()
-        # Leer la API key desde las variables de entorno
         self.api_key = os.getenv("COHERE_API_KEY")  
         
         if not self.api_key:
