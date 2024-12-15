@@ -7,7 +7,14 @@ const MessageInput = ({ onSendMessage }) => {
   const handleSendMessage = () => {
     if (message.trim()) {
       onSendMessage(message);
-      setMessage('');  // Clear input after sending the message
+      setMessage(''); 
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSendMessage();
     }
   };
 
@@ -19,6 +26,7 @@ const MessageInput = ({ onSendMessage }) => {
         placeholder="Escribe tu mensaje..."
         value={message}
         onChange={(e) => setMessage(e.target.value)}
+        onKeyDown={handleKeyDown}  // Add onKeyDown handler
         sx={{
           '& .MuiOutlinedInput-root': {
             backgroundColor: 'background.default',
