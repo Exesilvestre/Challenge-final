@@ -1,8 +1,10 @@
+# services/conversation_service.py
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from models.database import Conversation, Message
 from models.schemas import ConversationCreate
-from utils.cohere_client import CohereClient
+from utils.agent import llm_final_response
+from utils.llm_agent import get_llm_response
 
 def create_conversation_service(db: Session, conversation_data: ConversationCreate):
     existing_conversation = db.query(Conversation).filter(Conversation.name == conversation_data.name).first()
@@ -41,36 +43,46 @@ def get_all_conversations_service(db: Session):
     return db.query(Conversation).all()
 
 def generate_message_service(db: Session, conversation_id: int, prompt: str):
-    # Verificar si la conversación existe
     conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
 
-    # Guardar el mensaje del usuario
     user_message = Message(content=prompt, role="user", conversation_id=conversation_id)
     db.add(user_message)
     db.commit()
     db.refresh(user_message)
 
-    # Generar la respuesta
-    cohere_client = CohereClient()
-    response_content = cohere_client.generate_text(prompt, max_tokens=100)
+    # Obtener el historial de la conversación
+    conversation_history = get_conversation_history(db, conversation_id)
 
-    # Guardar la respuesta del asistente
-    assistant_message = Message(content=response_content, role="assistant", conversation_id=conversation_id)
+    # Crear un mensaje histórico para el modelo
+    history = "\n".join([f"{message['role']}: {message['content']}" for message in conversation_history])
+
+    # Prepend the conversation history to the prompt
+    prompt_with_history = f"History:\n{history}\nUser: {prompt}\nAssistant:"
+
+    # Llamar a la función llm_final_response para generar la respuesta
+    try:
+        llm_response = llm_final_response(prompt_with_history, conversation_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error en LLM: {str(e)}")
+    print(llm_response)
+    # Guardar la respuesta final en la base de datos
+    assistant_message = Message(content=llm_response, role="assistant", conversation_id=conversation_id)
     db.add(assistant_message)
     db.commit()
     db.refresh(assistant_message)
 
-    return {"response": response_content}
+    return {"response": llm_response}
 
+def get_conversation_history(db: Session, conversation_id: int):
+    messages = db.query(Message).filter(Message.conversation_id == conversation_id).order_by(Message.id.desc()).limit(5).all()
+    return [{"role": message.role, "content": message.content} for message in reversed(messages)]
 
 def get_messages_service(db: Session, conversation_id: int):
-    # Verificar si la conversación existe
     conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
     if not conversation:
         raise HTTPException(status_code=404, detail="Conversation not found")
 
-    # Obtener los mensajes de la conversación
     messages = db.query(Message).filter(Message.conversation_id == conversation_id).all()
     return messages

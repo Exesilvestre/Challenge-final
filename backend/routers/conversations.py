@@ -48,6 +48,7 @@ def generate_message(conversation_id: int, prompt: MessagePrompt, db: Session = 
     except HTTPException as e:
         raise e
     except Exception as e:
+        print(f"Error en generate_message_service: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
