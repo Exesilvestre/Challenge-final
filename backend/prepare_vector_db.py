@@ -16,8 +16,6 @@ def create_chunk_embedding():
     if not cohere_api_key:
         raise ValueError("Falta la clave de API de Cohere en las variables de entorno.")
 
-    # Inicializa el modelo de embeddings de Cohere
-    cohere_embeddings = CohereEmbeddings(cohere_api_key=cohere_api_key, model='embed-multilingual-v3.0')
 
     # Ruta al directorio que contiene los archivos PDF
     pdf_directory = './data'
@@ -26,7 +24,7 @@ def create_chunk_embedding():
     vectorstore =chroma_config()
 
     # Crea el separador de texto (text splitter)
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=2500, chunk_overlap=100)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=200)
     
     # Itera sobre todos los archivos PDF en el directorio y sus subdirectorios
     pdf_files = glob.glob(os.path.join(pdf_directory, '**/*.pdf'), recursive=True)

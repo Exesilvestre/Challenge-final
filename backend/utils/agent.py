@@ -3,80 +3,17 @@ import json
 import os
 from cohere import ToolMessage
 from dotenv import load_dotenv
-from fastapi import HTTPException
-from pydantic import BaseModel, Field
-import requests
-from langchain_cohere import ChatCohere, CohereEmbeddings
+from langchain_cohere import ChatCohere
 from langgraph.graph import StateGraph, START, END, MessagesState
 from langgraph.graph.message import add_messages
 from typing import Annotated, Literal, TypedDict
-from IPython.display import Image, display
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_core.messages import HumanMessage
-from langchain_core.tools import tool
-
-from utils.chroma_config import chroma_config
-
-def create_query_embedding(query_text):
-    load_dotenv()
-
-    cohere_embeddings = CohereEmbeddings(model='embed-multilingual-v3.0')
-    # Embedding the query text
-    query_embedding = cohere_embeddings.embed_query(query_text)
-
-    return query_embedding
-
+from utils.tools.get_dolar import get_dolar_hoy
+from utils.tools.search_vector_db import search_vector_db
 
 # Cargar variables de entorno si es necesario
 load_dotenv()
-    
-perisent_directory = "../data/chromadb"
-collection_name= "finanzas"
-embeddings_functions = CohereEmbeddings(model='embed-multilingual-v3.0')
-# Crear la herramienta para consultar Chroma
-@tool
-def search_vector_db(query: str):
-    """
-    Herramienta para consultar la base de datos vectorial de Chroma.
-    
-    Args:
-        query (str): La consulta para buscar en la base de datos.
-    
-    Returns:
-        str: Los documentos relevantes encontrados.
-    """
-    query_embedding = create_query_embedding(query)
-    vector_store = chroma_config()
-    print(vector_store.get())
-    results = vector_store.similarity_search_by_vector(
-        embedding=query_embedding,
-        k=1
-    )
-    print(results)
-    if not results:
-        raise HTTPException(status_code=404, detail="No results found")
-
-    return results[0].page_content
-
-@tool
-def get_dolar_hoy(query: str) -> str:
-    """
-    Obtiene el tipo de cambio actual del dólar desde la API.
-    Esta función realiza una solicitud GET a la API 'dolarapi.com' para obtener
-    los datos del tipo de cambio actual.
-
-    Devuelve:
-        str: Una cadena que contiene el tipo de cambio actual del dólar o un mensaje de error.
-    """
-    url = 'https://dolarapi.com/v1/dolares'
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        dolar_data = response.json()
-        return f"Dólar hoy: {dolar_data}"
-    except requests.RequestException as e:
-        return f"Error al obtener información del dólar: {str(e)}"
-
 
 tools = [get_dolar_hoy, search_vector_db]
 
@@ -122,7 +59,7 @@ class BasicToolNode:
             )
         return {"messages": outputs}
     
-tool_node = BasicToolNode(tools=[get_dolar_hoy, search_vector_db])
+tool_node = BasicToolNode(tools=tools)
 graph_builder.add_node("tools", tool_node)
     
 def route_tools(state: State) -> Literal["tools", "__end__"]:

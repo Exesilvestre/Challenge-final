@@ -3,14 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from models.database import init_db
 from routers import conversations
 
-# Initialize the FastAPI app
 app = FastAPI()
 
 @app.on_event("startup")
 async def startup():
     init_db()
     
-# Register routers
+# Registro router
 app.include_router(conversations.router, prefix="/conversations", tags=["Conversations"])
 
 # Root endpoint
@@ -20,7 +19,7 @@ def root():
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Solo la URL base del frontend
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

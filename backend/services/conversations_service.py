@@ -6,6 +6,7 @@ from models.schemas import ConversationCreate
 from utils.agent import llm_final_response
 from utils.llm_agent import get_llm_response
 
+
 def create_conversation_service(db: Session, conversation_data: ConversationCreate):
     existing_conversation = db.query(Conversation).filter(Conversation.name == conversation_data.name).first()
     if existing_conversation:
