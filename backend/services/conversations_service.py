@@ -63,7 +63,7 @@ def generate_message_service(db: Session, conversation_id: int, prompt: str):
 
     # Llamar a la función llm_final_response para generar la respuesta
     try:
-        llm_response = llm_final_response(prompt_with_history, conversation_id)
+        llm_response = get_llm_response(prompt_with_history)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en LLM: {str(e)}")
     print(llm_response)

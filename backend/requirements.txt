@@ -6,3 +6,5 @@ pydantic
 sqlalchemy
 langchain
 langgraph
+crhomadb==0.5
+pypdf
