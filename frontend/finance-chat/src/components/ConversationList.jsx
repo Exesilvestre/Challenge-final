@@ -49,7 +49,7 @@ const ConversationList = ({ conversations, onSelectConversation, onEditConversat
       }}
     >
       <Typography variant="h6" gutterBottom color="primary" align="center">
-        CONVERSACIONES
+        FINTELLIGENCE
       </Typography>
       <List>
         {conversations.map((conversation) => (

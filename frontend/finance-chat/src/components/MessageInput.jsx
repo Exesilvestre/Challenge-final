@@ -19,14 +19,14 @@ const MessageInput = ({ onSendMessage }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', padding: 2, backgroundColor: 'background.paper', border: '1px solid #fff', borderRadius: 8, marginLeft:'1.5rem', marginRight: '1.5rem' }}>
+    <Box sx={{ display: 'flex', padding: 2, backgroundColor: 'background.paper', border: '1px solid #fff', borderRadius: 8, marginLeft: '1rem', marginRight: '1rem' }}>
       <TextField
         fullWidth
         variant="outlined"
         placeholder="Escribe tu mensaje..."
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        onKeyDown={handleKeyDown}  // Add onKeyDown handler
+        onKeyDown={handleKeyDown}
         sx={{
           '& .MuiOutlinedInput-root': {
             backgroundColor: 'background.default',
