@@ -23,7 +23,7 @@ class State(TypedDict):
 graph_builder = StateGraph(State)
 
 llm = ChatCohere(cohere_api_key=os.getenv("COHERE_API_KEY"),              
-                 model="command-r-plus-08-2024",
+                 model="command-r7b-12-2024",
                  temperature=0)
 
 llm_with_tools = llm.bind_tools(tools)
