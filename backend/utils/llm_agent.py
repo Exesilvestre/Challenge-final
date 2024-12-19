@@ -38,7 +38,8 @@ def get_llm_response(input_text: str, history: str) -> str:
     3. Responde de forma concisa, resumida y entendible para personas no expertas en finanzas.
     4. Si el usuario pregunta por un tema que no sea de finanzas,
       reponde comunicandole cual es tu especialdiad, pero si puedes repsonder saludos.
-    5. Si el usuario pide una recomendacion de inversion, expresale que debe consultar a un especialista
+    5. Si el usuario pide una recomendacion de inversion 
+    puedes repsonder pero aclara que consulte a un especialista
     
     Solo debes responder consultas relacionadas a las finanzas e inversiones.
     Si no encuentras información adecuada en las fuentes disponibles, sé transparente y comunícalo al usuario en lugar de inventar una respuesta.
@@ -59,7 +60,6 @@ def get_llm_response(input_text: str, history: str) -> str:
         Usuario:
         {input_text}
 
-        Asistente:
         """
     )
 
@@ -76,11 +76,9 @@ def get_llm_response(input_text: str, history: str) -> str:
     # Ejecutar el agente con el input proporcionado
     agent_executor = AgentExecutor(agent=agent, tools=[get_dolar_hoy, search_vector_db, get_symbol_for_company, get_stock_quote], verbose=True)
 
-    # Asegurarse de que la salida no contenga caracteres adicionales
     response = agent_executor.invoke({
         "preamble": preamble,
         "input": query_input.query
     })
 
-    # Asegúrate de que la respuesta esté bien formada y sin caracteres extra
     return response.get('output', 'No output generated')
