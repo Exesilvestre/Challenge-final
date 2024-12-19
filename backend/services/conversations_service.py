@@ -56,18 +56,15 @@ def generate_message_service(db: Session, conversation_id: int, prompt: str):
     # Obtener el historial de la conversación
     conversation_history = get_conversation_history(db, conversation_id)
 
-    # Crear un mensaje histórico para el modelo
+    # Crear la historia de la conversación apra el modelo
     history = "\n".join([f"{message['role']}: {message['content']}" for message in conversation_history])
-
-    # Prepend the conversation history to the prompt
-    prompt_with_history = f"History:\n{history}\nUser: {prompt}\nAssistant:"
 
     # Llamar a la función llm_final_response para generar la respuesta
     try:
-        llm_response = get_llm_response(prompt_with_history)
+        llm_response = get_llm_response(prompt, history)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en LLM: {str(e)}")
-    print(llm_response)
+    
     # Guardar la respuesta final en la base de datos
     assistant_message = Message(content=llm_response, role="assistant", conversation_id=conversation_id)
     db.add(assistant_message)
@@ -77,13 +74,5 @@ def generate_message_service(db: Session, conversation_id: int, prompt: str):
     return {"response": llm_response}
 
 def get_conversation_history(db: Session, conversation_id: int):
-    messages = db.query(Message).filter(Message.conversation_id == conversation_id).order_by(Message.id.desc()).limit(5).all()
+    messages = db.query(Message).filter(Message.conversation_id == conversation_id).order_by(Message.id.desc()).limit(4).all()
     return [{"role": message.role, "content": message.content} for message in reversed(messages)]
-
-def get_messages_service(db: Session, conversation_id: int):
-    conversation = db.query(Conversation).filter(Conversation.id == conversation_id).first()
-    if not conversation:
-        raise HTTPException(status_code=404, detail="Conversation not found")
-
-    messages = db.query(Message).filter(Message.conversation_id == conversation_id).all()
-    return messages
